@@ -1,0 +1,28 @@
+{
+  "name": "graphql-booking-event",
+  "version": "1.0.0",
+  "description": "React-Node-GrapgQL application following the Youtube tutorial from @mschwarzmueller",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/silvestrevivo/graphql-booking-event.git"
+  },
+  "keywords": [
+    "react",
+    "node",
+    "graphql"
+  ],
+  "author": "@silvestrevivo",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/silvestrevivo/graphql-booking-event/issues"
+  },
+  "homepage": "https://github.com/silvestrevivo/graphql-booking-event#readme",
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "express": "^4.16.4"
+  }
+}
