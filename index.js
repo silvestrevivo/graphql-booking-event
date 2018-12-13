@@ -4,10 +4,11 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const graphqlHttp = require('express-graphql');
 const { buildSchema } = require('graphql');
+const mongoose = require('mongoose');
+
+const Event = require('./models/Event');
 
 const app = express();
-
-const events = [];
 
 app.use(bodyParser.json())
 
@@ -43,23 +44,57 @@ app.use('/graphql', graphqlHttp({
   `),
   rootValue: {
     events: () => {
-      return events;
+      return Event.find().then(events => {
+        return events.map(event => {
+          return { ...event._doc, _id: event._doc._id.toString() }
+        })
+      }).catch(err => {
+        console.log(err)
+        throw err;
+      })
     },
     createEvent: (args) => {
-      const event = {
-        _id: Math.random().toString(),
+      const event = new Event({
         title: args.eventInput.title,
         description: args.eventInput.description,
         price: +args.eventInput.price,
-        date: args.eventInput.date,
-      }
-      events.push(event)
-      return event;
+        date: new Date(args.eventInput.date)
+      });
+      return event.save()
+        .then(result => {
+          console.log(result)
+          return { ...event._doc, _id: event.id }
+        })
+        .catch(err => {
+          console.log(err)
+          throw err;
+        })
     }
   },
   graphiql: true
 }))
 
-const port = process.env.PORT || 3000;
+// file configuration to run DB
+const config = require('./config/keys').get(process.env.NODE_ENV)
 
-app.listen(port, () => console.log(`Server listening on port ${port}`))
+// Connecting to DB
+app.set('port', process.env.PORT || 3000)
+mongoose.Promise = global.Promise
+mongoose.set('useCreateIndex', true)
+mongoose.connect(
+  config.DATABASE,
+  { useNewUrlParser: true },
+)
+
+mongoose.connection
+  .once('open', () => {
+    // making the app listening to port
+    app.listen(app.get('port'), () => {
+      console.log(`Server started on port ${app.get('port')}
+      Connected to MLab Database`)
+    })
+  })
+  .on('error', error => {
+    // in case of error
+    return console.warn(`Error connecting to the data base: ${error}`)
+  })
